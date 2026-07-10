@@ -1,0 +1,16 @@
+# binaries
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Secrets/Config
+.env
+config.json
+
+# Editor/OS clutter
+.DS_Store
+.vscode/
+.idea/
