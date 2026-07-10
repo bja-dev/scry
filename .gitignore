@@ -9,6 +9,7 @@
 # Secrets/Config
 .env
 config.json
+*.txt
 
 # Editor/OS clutter
 .DS_Store
