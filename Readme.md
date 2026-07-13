@@ -1,4 +1,5 @@
 # scry
-small-scale lightweight tool to consistently update and keep track of gains of small groups of *osrs* players.
+Small-scale Go client and monitoring tool for the [Wise Old Man API](https://docs.wiseoldman.net/api). 
 
-utilises **wise old man**'s api to periodically (*hourly, subject to change based on API limits*) trigger updates for certain players.
+Provides an interface for handling and interacting with Old School Runescape player data. Primary objective is to keep automated track of a handful of Old School Runescape players, utilising a Discord Webhook to notify if changes have occurred.
+
