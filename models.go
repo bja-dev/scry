@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"fmt"
+	"github.com/dustin/go-humanize"
 )
 type Player struct {
 	ID             int       `json:"id"`
@@ -42,33 +43,35 @@ Score		int	`json:"score,omitempty"`
 }
 
 func (md MetricData) Print() {
+	// NOTE: this method currently infers that difference is always positive. I'm unsure if EHP/EHB methods updating will lower those numbers, which could mean that those numbers can decrease. But, the checks should mean that won't print if its the case.
 	if md.Metric == "" {
 		return
 	}
-	fmt.Println("Stats for ", md.Metric)
+	fmt.Println("Stats for", md.Metric)
 	if md.Experience > 0 {
-		fmt.Println("-> Experience: ", md.Experience)
+		fmt.Printf("-> Experience: +%s\n",humanize.Comma(int64(md.Experience)))
 	}
 
 	if md.Level > 0 {
-		fmt.Println("-> Level: ", md.Level)
+		fmt.Printf("-> Level: +%s\n",humanize.Comma(int64(md.Level)))
 	}
 
 	if md.Ehp > 0.0 {
-		fmt.Println("-> Ehp: ", md.Ehp)
+		fmt.Printf("-> Ehp: +%f\n", md.Ehp)
 	}
 
 	if md.Kills > 0 {
-		fmt.Println("-> Kills: ", md.Kills)
+		fmt.Printf("-> Kills: +%s\n", humanize.Comma(int64(md.Kills)))
 	}
 
-	if md.Ehb > 0 {
-		fmt.Println("-> Ehb: ", md.Ehb)
+	if md.Ehb > 0.0 {
+		fmt.Printf("-> Ehb: +%f\n", md.Ehb)
 	}
 
 	if md.Score > 0 {
-		fmt.Println("-> Score: ", md.Score)
+		fmt.Printf("-> Score: +%s\n", humanize.Comma(int64(md.Score)))
 	}
+	fmt.Println("")
 }
 
 func (md MetricData) Equal(md2 MetricData) bool{
@@ -89,12 +92,38 @@ type SnapshotDiff struct {
 	Activities	map[string]MetricData `json:"activities"`
 }
 
+func (sd SnapshotDiff) Print() {
+	fmt.Println("Snapshot Diff:")
+	fmt.Printf("Exp: %d    -    Ehp: %f    -    Ehb: %f\n", sd.Exp, sd.Ehp, sd.Ehb)
+	if (len(sd.Skills) >0) {
+		fmt.Println("\nSkills:")
+		for _, v := range sd.Skills { // NOTE: any way to ensure overall is printed first?
+			v.Print()
+		}
+	}
+
+	if (len(sd.Bosses) >0) {
+		fmt.Println("\nBosses:")
+		for _, v := range sd.Bosses {
+			v.Print()
+		}
+	}
+
+	if (len(sd.Activities) >0) {
+		fmt.Println("\nActivities:")
+		for _, v := range sd.Activities{
+			v.Print()
+		}
+	}
+}
+
 func (p Player) Equal(p2 Player) bool {
 	// Manual Shallow comparison using ID, Username, EXP, EHP and EHB. NOTE: this could bug out if u increase metrics without gaining exp. Clue Caskets, etc.
 	return p.ID == p2.ID && p.Username == p2.Username && p.Exp == p2.Exp && p.Ehp == p2.Ehp && p.Ehb == p2.Ehb 
 }
 
 func diffMap(oldMap, newMap map[string]MetricData) map[string]MetricData {
+	//NOTE: something is wrong here regarding EHP/EHB.
     diffs := make(map[string]MetricData)
     for name, newM := range newMap {
         oldM, exists := oldMap[name]
@@ -112,7 +141,7 @@ func diffMap(oldMap, newMap map[string]MetricData) map[string]MetricData {
         // Only keep if something changed
 	if delta.Experience != 0 || delta.Level != 0 || delta.Kills != 0 || delta.Score != 0 {
 		diffs[name] = delta
-		delta.Print()
+		//delta.Print()
         }
     }
     return diffs

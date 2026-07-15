@@ -4,7 +4,7 @@ import (
 	"testing"
 	"encoding/json"
 	"os"
-	"fmt"
+//	"fmt"
 )
 
 func TestPlayerStruct(t *testing.T) {
@@ -93,7 +93,8 @@ func TestDiff(t *testing.T) {
 	}
 
 	got := p1.GetDiff(p2)
-	fmt.Printf("DEBUG: Skills count: %d, Bosses count: %d, Activities count: %d\n", len(got.Skills), len(got.Bosses), len(got.Activities))
+	//fmt.Printf("DEBUG: Skills count: %d, Bosses count: %d, Activities count: %d\n", len(got.Skills), len(got.Bosses), len(got.Activities))
+	/*
 	for _, v := range got.Skills {
 		v.Print()
 	}
@@ -103,6 +104,7 @@ func TestDiff(t *testing.T) {
 	for _, v := range got.Activities {
 		v.Print()
 	}
+	*/
 	want := SnapshotDiff{
 		Exp:	20000000,
 		Skills:		make(map[string]MetricData),
@@ -145,4 +147,23 @@ func TestDiff(t *testing.T) {
 	if !want.Activities["clue_scrolls_master"].Equal(got.Activities["clue_scrolls_master"]) {
 		t.Errorf("Error: clue_scrolls_master was not accurate: %d != %d\n", got.Activities["clue_scrolls_master"].Score, want.Activities["clue_scrolls_master"].Score)
 	}
+}
+
+func TestPrintDiffNoAssertion(t *testing.T) {
+	file, _ := os.ReadFile("test_bnl.json")
+	var p3 Player
+	err := json.Unmarshal(file, &p3)
+	if err != nil {
+		t.Fatalf("Unmarshal Error: %v", err)
+	}
+
+	file2, _ := os.ReadFile("test_bnl-updated.json")
+	var p4 Player
+	err = json.Unmarshal(file2, &p4)
+	if err != nil {
+		t.Fatalf("Unmarshal Error: %v", err)
+	}
+
+	got := p3.GetDiff(p4)
+	got.Print()
 }
