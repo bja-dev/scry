@@ -1,4 +1,4 @@
-package main
+package wom
 
 import (
 	"testing"
@@ -119,7 +119,6 @@ func TestDiff(t *testing.T) {
 	want.Bosses["abyssal_sire"] = MetricData{Kills: 60}
 	want.Activities["clue_scrolls_all"] = MetricData{Score: 1}
 	want.Activities["clue_scrolls_master"] = MetricData{Score: 1}
-	// Hook comparison up by iterating through each thing TODO:
 	if got.Exp != want.Exp {
 		t.Errorf("Error: experience was not accurate: %d != %d\n", got.Exp, want.Exp)
 	}

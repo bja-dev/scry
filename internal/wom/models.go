@@ -1,4 +1,4 @@
-package main
+package wom
 
 import (
 	"time"
@@ -157,3 +157,7 @@ func (p1 Player) GetDiff(p2 Player) SnapshotDiff {
         	Activities: 	diffMap(p1.LatestSnapshot.Data.Activities, p2.LatestSnapshot.Data.Activities),
     }
 }
+
+//TODO: set up and test WOM-api requests over the next few days
+//TODO: establish cache and interactions
+//TODO: setup discord webhook
