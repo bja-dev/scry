@@ -8,7 +8,7 @@ import (
 )
 
 func TestPlayerStruct(t *testing.T) {
-    file, _ := os.ReadFile("test_bnl.json")
+    file, _ := os.ReadFile("../../data/test/test_bnl.json")
 
     var player Player
     err := json.Unmarshal(file, &player)
@@ -55,7 +55,7 @@ func TestPlayerStruct(t *testing.T) {
 }
 
 func TestEqual(t *testing.T) {
-	file, _ := os.ReadFile("test_bnl.json")
+	file, _ := os.ReadFile("../../data/test/test_bnl.json")
 
 	var p1 Player
 	err := json.Unmarshal(file, &p1)
@@ -63,7 +63,7 @@ func TestEqual(t *testing.T) {
 	t.Fatalf("Unmarshal Error: %v", err)
 	}
 
-	file2, _ := os.ReadFile("test_dfg.json")
+	file2, _ := os.ReadFile("../../data/test/test_dfg.json")
 	    var p2 Player
 	    err = json.Unmarshal(file2, &p2)
 	    if err != nil {
@@ -78,14 +78,14 @@ func TestEqual(t *testing.T) {
 }
 
 func TestDiff(t *testing.T) {
-	file, _ := os.ReadFile("test_bnl.json")
+	file, _ := os.ReadFile("../../data/test/test_bnl.json")
 	var p1 Player
 	err := json.Unmarshal(file, &p1)
 	if err != nil {
 		t.Fatalf("Unmarshal Error: %v", err)
 	}
 
-	file2, _ := os.ReadFile("test_bnl2.json")
+	file2, _ := os.ReadFile("../../data/test/test_bnl2.json")
 	var p2 Player
 	err = json.Unmarshal(file2, &p2)
 	if err != nil {
@@ -149,14 +149,14 @@ func TestDiff(t *testing.T) {
 }
 
 func TestPrintDiffNoAssertion(t *testing.T) {
-	file, _ := os.ReadFile("test_bnl.json")
+	file, _ := os.ReadFile("../../data/test/test_bnl.json")
 	var p3 Player
 	err := json.Unmarshal(file, &p3)
 	if err != nil {
 		t.Fatalf("Unmarshal Error: %v", err)
 	}
 
-	file2, _ := os.ReadFile("test_bnl-updated.json")
+	file2, _ := os.ReadFile("../../data/test/test_bnl-updated.json")
 	var p4 Player
 	err = json.Unmarshal(file2, &p4)
 	if err != nil {
