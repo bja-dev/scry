@@ -99,7 +99,6 @@ func archiveCurrentFile(username string) error {
     return os.Rename(sourcePath, destPath)
 }
 
-// TODO: request methods, use getplayerdata to check if err != nil then pull :D
 
 func getPlayerFromAPI(username string) (Player, error) {
 	var p Player

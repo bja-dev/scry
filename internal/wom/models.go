@@ -158,6 +158,4 @@ func (p1 Player) GetDiff(p2 Player) SnapshotDiff {
     }
 }
 
-//TODO: set up and test WOM-api requests over the next few days
-//TODO: establish cache and interactions
 //TODO: setup discord webhook
