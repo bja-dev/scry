@@ -2,13 +2,13 @@ package main
 
 import (
 	"github.com/bja-dev/scry/internal/wom"
-	"fmt"
 	"bytes"
 	"net/http"
 	"os"
 	"time"
 	"log"
 	"github.com/joho/godotenv"
+	"encoding/json"
 )
 
 
@@ -30,13 +30,13 @@ func main() {
 	for _, player := range players {
 		current, er := wom.ReadLocalPlayer(player)
 		if er != nil {
-			log.Fatalf("Error: %v\n", er)
-			os.Exit(1)
+			log.Printf("ERROR: reading local player %s: %v", player, er)
+			continue
 		}
 		p, err := wom.GetPlayerFromAPI(player)
 		if err != nil {
-			log.Fatalf("Error: %v\n", err)
-			os.Exit(1)
+			log.Printf("ERROR: fetching API data for %s: %v", player, err)
+			continue
 		}
 
 		if current.Username == "" {
@@ -44,23 +44,33 @@ func main() {
 			continue
 		}
 
+		log.Printf("DEBUG: Comparing player %s -> Local UpdatedAt: [%s] vs API UpdatedAt: [%s]", 
+            player, current.UpdatedAt, p.UpdatedAt)
 		if p.UpdatedAt == current.UpdatedAt {
 			// curl update "no change", or no message
+			log.Printf("DEBUG: No changes detected for %s. skipping", player)
 			continue
 		}
+		log.Printf("DEBUG: Changes detected, sending webhook for %s", player)
 		diff := p.GetDiff(current)
-		content := fmt.Sprintf("{ \"content\": \"%s\"}", diff.Format())
-		payloadBytes := []byte(content)
+		payload := map[string]string{
+    "content": diff.Format(),
+}
+		payloadBytes, err := json.Marshal(payload)
+		if err != nil {
+			log.Printf("failed to marshal JSON: %v", err)
+			continue
+		}
+
 		resp, err := http.Post(DISCORD_WEBHOOK_URL, "application/json", bytes.NewBuffer(payloadBytes))
 		if err != nil {
-			log.Fatalf("failed to send webhook request: %v", err)
-			os.Exit(1)
+			log.Printf("failed to send webhook request: %v", err)
+			continue
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-			log.Fatalf("discord webhook returned non-success status: %d", resp.StatusCode)
-			os.Exit(1)
+			log.Printf("discord webhook returned non-success status: %d", resp.StatusCode)
 		}
 		time.Sleep(3 * time.Second) // see if this is necessary
 	}

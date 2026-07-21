@@ -44,15 +44,24 @@ Ehb		float64	`json:"ehb,omitempty"`
 Score		int	`json:"score,omitempty"`
 }
 
+func prettyMetricName(metric string) string {
+	metric = strings.ReplaceAll(metric, "_", " ")
+	parts := strings.Fields(metric)
+	for i, part := range parts {
+		if len(part) == 0 {
+			continue
+		}
+		parts[i] = strings.ToUpper(part[:1]) + strings.ToLower(part[1:])
+	}
+	return strings.Join(parts, " ")
+}
+
 func (md MetricData) Print() string {
 	if md.Metric == "" {
 		return ""
 	}
 
-	metricName := md.Metric
-	if len(metricName) > 0 {
-		metricName = strings.ToUpper(metricName[:1]) + metricName[1:]
-	}
+	metricName := prettyMetricName(md.Metric)
 
 	var sb strings.Builder
 
@@ -139,9 +148,11 @@ func (sd SnapshotDiff) Format() string {
 	msg += fmt.Sprintf("✨ Experience: +%d    -    ⏳ EHP: +%f    -    🗡️ EHB: +%f\n", sd.Exp, sd.Ehp, sd.Ehb)
 	if len(sd.Bosses) != 0 {
 		msg += fmt.Sprintf("## 📊 __Skills__\n") // Skills are sorted by osrs standards (by release?)
-		for _, skill := range SkillOrder {
-			if diff, exists := sd.Skills[skill]; exists {
-				msg += diff.Print()
+		if len(sd.Skills) != 0 {
+			for _, skill := range SkillOrder {
+				if diff, exists := sd.Skills[skill]; exists {
+					msg += diff.Print()
+				}
 			}
 		}
 	}
@@ -194,17 +205,17 @@ func diffMap(oldMap, newMap map[string]MetricData) map[string]MetricData {
 
 func (p1 Player) GetDiff(p2 Player) SnapshotDiff {
 	if p1.Username != p2.Username {
-	    panic(fmt.Sprintf("cannot diff different players: %s and %s", p1.Username, p2.Username))
+		panic(fmt.Sprintf("cannot diff different players: %s and %s", p1.Username, p2.Username))
 	}
 	return SnapshotDiff{
-		Username:	p1.Username,
-		Exp:		p2.Exp - p1.Exp,
-		Ehp:		p2.Ehp - p1.Ehp,
-		Ehb:		p2.Ehb - p1.Ehb,
-        	Skills:		diffMap(p1.LatestSnapshot.Data.Skills, p2.LatestSnapshot.Data.Skills),
-        	Bosses:		diffMap(p1.LatestSnapshot.Data.Bosses, p2.LatestSnapshot.Data.Bosses),
-        	Activities: 	diffMap(p1.LatestSnapshot.Data.Activities, p2.LatestSnapshot.Data.Activities),
-    }
+		Username:    p1.Username,
+		Exp:        p1.Exp - p2.Exp,
+		Ehp:        p1.Ehp - p2.Ehp,
+		Ehb:        p1.Ehb - p2.Ehb,
+		Skills:        diffMap(p2.LatestSnapshot.Data.Skills, p1.LatestSnapshot.Data.Skills),
+		Bosses:        diffMap(p2.LatestSnapshot.Data.Bosses, p1.LatestSnapshot.Data.Bosses),
+		Activities:    diffMap(p2.LatestSnapshot.Data.Activities, p1.LatestSnapshot.Data.Activities),
+	}
 }
 
 //TODO: setup discord webhook

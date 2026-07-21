@@ -141,7 +141,7 @@ func archiveCurrentFile(username string) error {
 // DRY ified
 func fetchFromAPI(username string) (Player, error) {
 	url := fmt.Sprintf("https://api.wiseoldman.net/v2/players/%s", username)
-	req, err := http.NewRequest("POST", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return Player{}, err
 	}
