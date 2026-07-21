@@ -2,4 +2,7 @@ module github.com/bja-dev/scry
 
 go 1.26.4
 
-require github.com/dustin/go-humanize v1.0.1 // indirect
+require (
+	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
+)
