@@ -145,7 +145,7 @@ func (sd SnapshotDiff) Print() {
 func (sd SnapshotDiff) Format() string {
 	// TODO: determine if above print method is necessary
 	msg := fmt.Sprintf("# Update for %s\n", sd.Username)
-	msg += fmt.Sprintf("✨ Experience: +%d    -    ⏳ EHP: +%f    -    🗡️ EHB: +%f\n", sd.Exp, sd.Ehp, sd.Ehb)
+	msg += fmt.Sprintf("✨ Experience: +%d    -    ⏳ EHP: +%f    -    🗡️ EHB: +%f\n", humanize.Comma(int64(sd.Exp)), sd.Ehp, sd.Ehb)
 	if len(sd.Bosses) != 0 {
 		msg += fmt.Sprintf("## 📊 __Skills__\n") // Skills are sorted by osrs standards (by release?)
 		if len(sd.Skills) != 0 {
