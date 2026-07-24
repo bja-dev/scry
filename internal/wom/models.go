@@ -119,7 +119,7 @@ type SnapshotDiff struct {
 
 func (sd SnapshotDiff) Print() {
 	fmt.Println("Snapshot Diff:")
-	fmt.Printf("Exp: %d    -    Ehp: %f    -    Ehb: %f\n", humanize.Comma(int64(sd.Exp)), sd.Ehp, sd.Ehb)
+	fmt.Printf("Exp: %s    -    Ehp: %f    -    Ehb: %f\n", humanize.Comma(int64(sd.Exp)), sd.Ehp, sd.Ehb)
 	if (len(sd.Skills) >0) {
 		fmt.Println("\nSkills:")
 		for _, v := range sd.Skills {
@@ -145,14 +145,12 @@ func (sd SnapshotDiff) Print() {
 func (sd SnapshotDiff) Format() string {
 	// TODO: determine if above print method is necessary
 	msg := fmt.Sprintf("# Update for %s\n", sd.Username)
-	msg += fmt.Sprintf("✨ Experience: +%d    -    ⏳ EHP: +%f    -    🗡️ EHB: +%f\n", humanize.Comma(int64(sd.Exp)), sd.Ehp, sd.Ehb)
-	if len(sd.Bosses) != 0 {
+	msg += fmt.Sprintf("✨ Experience: +%s    -    ⏳ EHP: +%f    -    🗡️ EHB: +%f\n", humanize.Comma(int64(sd.Exp)), sd.Ehp, sd.Ehb)
+	if len(sd.Skills) != 0 {
 		msg += fmt.Sprintf("## 📊 __Skills__\n") // Skills are sorted by osrs standards (by release?)
-		if len(sd.Skills) != 0 {
-			for _, skill := range SkillOrder {
-				if diff, exists := sd.Skills[skill]; exists {
-					msg += diff.Print()
-				}
+		for _, skill := range SkillOrder {
+			if diff, exists := sd.Skills[skill]; exists {
+				msg += diff.Print()
 			}
 		}
 	}
@@ -195,7 +193,7 @@ func diffMap(oldMap, newMap map[string]MetricData) map[string]MetricData {
         }
 
         // Only keep if something changed
-	if delta.Experience != 0 || delta.Level != 0 || delta.Kills != 0 || delta.Score != 0 {
+	if delta.Experience != 0 || delta.Level != 0 || delta.Kills != 0 || delta.Score != 0 || delta.Ehp != 0 || delta.Ehb != 0 {
 		diffs[name] = delta
 		//delta.Print()
         }
