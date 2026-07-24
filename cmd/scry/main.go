@@ -60,6 +60,14 @@ func main() {
 		log.Printf("DEBUG: Changes detected, building diff and sending webhook for %s", player)
 
 		diff := p.GetDiff(current)
+		if diff.IsEmpty() {
+			log.Printf("DEBUG: No meaningful diff for %s after UpdatedAt change. Saving baseline and skipping webhook.", player)
+			if err := wom.SaveData(player, p); err != nil {
+				log.Printf("Error: failed to update local baseline for %s: %v", player, err)
+			}
+			continue
+		}
+
 		payload := map[string]string{
 			"content": diff.Format(),
 		}

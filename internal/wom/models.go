@@ -166,6 +166,7 @@ func (sd SnapshotDiff) Format() string {
 			msg += diff.Print()
 		}
 	}
+	msg += "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
 	return msg
 }
 
@@ -214,6 +215,16 @@ func (p1 Player) GetDiff(p2 Player) SnapshotDiff {
 		Bosses:        diffMap(p2.LatestSnapshot.Data.Bosses, p1.LatestSnapshot.Data.Bosses),
 		Activities:    diffMap(p2.LatestSnapshot.Data.Activities, p1.LatestSnapshot.Data.Activities),
 	}
+}
+
+func (sd SnapshotDiff) IsEmpty() bool {
+	if sd.Exp != 0 || sd.Ehp != 0 || sd.Ehb != 0 {
+		return false
+	}
+	if len(sd.Skills) != 0 || len(sd.Bosses) != 0 || len(sd.Activities) != 0 {
+		return false
+	}
+	return true
 }
 
 //TODO: setup discord webhook
