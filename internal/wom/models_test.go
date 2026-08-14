@@ -121,21 +121,3 @@ func TestDiff(t *testing.T) {
 	}
 }
 
-func TestPrintDiffNoAssertion(t *testing.T) {
-	file, _ := os.ReadFile("../../data/test/test_bnl.json")
-	var p3 Player
-	err := json.Unmarshal(file, &p3)
-	if err != nil {
-		t.Fatalf("Unmarshal Error: %v", err)
-	}
-
-	file2, _ := os.ReadFile("../../data/test/test_bnl-updated.json")
-	var p4 Player
-	err = json.Unmarshal(file2, &p4)
-	if err != nil {
-		t.Fatalf("Unmarshal Error: %v", err)
-	}
-
-	got := p3.GetDiff(p4)
-	print(got.Format())
-}

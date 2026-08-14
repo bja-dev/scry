@@ -110,7 +110,7 @@ type SnapshotDiff struct {
 
 func (sd SnapshotDiff) Print() {
 	fmt.Println("Snapshot Diff:")
-	fmt.Printf("Exp: %d    -    Ehp: %f    -    Ehb: %f\n", humanize.Comma(int64(sd.Exp)), sd.Ehp, sd.Ehb)
+	fmt.Printf("Exp: %s    -    Ehp: %f    -    Ehb: %f\n", humanize.Comma(int64(sd.Exp)), sd.Ehp, sd.Ehb)
 	if (len(sd.Skills) >0) {
 		fmt.Println("\nSkills:")
 		for _, v := range sd.Skills {

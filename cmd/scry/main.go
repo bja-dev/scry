@@ -14,9 +14,8 @@ import (
 
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("no .env found at project root; using environment variables")
 	}
 	var DISCORD_WEBHOOK_URL = os.Getenv("DISCORD_WEBHOOK_URL")
 	if DISCORD_WEBHOOK_URL == "" {

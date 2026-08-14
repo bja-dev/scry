@@ -1,29 +1,18 @@
 package wom
 
-import(
-	"fmt"
-	"os"
+import (
 	"bufio"
-	"time"
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"github.com/joho/godotenv"
-	"log"
+	"os"
+	"time"
 )
 
 var (
-	WOM_API_KEY	string
-	WOM_USER_AGENT	string
+	WOM_API_KEY   string
+	WOM_USER_AGENT string
 )
-
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	WOM_API_KEY = os.Getenv("WOM_API_KEY")
-	WOM_USER_AGENT = os.Getenv("WOM_USER_AGENT")
-}
 
 func ScanFile(path string) ([]string, error) {
         // Takes a filepath and scans its lines into a string array
@@ -147,8 +136,8 @@ func fetchFromAPI(username string) (Player, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", WOM_API_KEY)
-	req.Header.Set("User-Agent", WOM_USER_AGENT)
+	req.Header.Set("x-api-key", os.Getenv("WOM_API_KEY"))
+	req.Header.Set("User-Agent", os.Getenv("WOM_USER_AGENT"))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
