@@ -1,68 +1,100 @@
 package main
 
 import (
-	"github.com/bja-dev/scry/internal/wom"
-	"fmt"
 	"bytes"
+	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"time"
-	"log"
+
+	"github.com/bja-dev/scry/internal/wom"
 	"github.com/joho/godotenv"
 )
-
-
 
 func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Printf("no .env found at project root; using environment variables")
 	}
-	var DISCORD_WEBHOOK_URL = os.Getenv("DISCORD_WEBHOOK_URL")
-	if DISCORD_WEBHOOK_URL == "" {
+
+	discordWebhookURL := os.Getenv("DISCORD_WEBHOOK_URL")
+	if discordWebhookURL == "" {
 		log.Fatalf("Error: DISCORD_WEBHOOK_URL environment variable is not set")
 	}
+
 	players, e := wom.ScanFile("users.txt")
 	if e != nil {
 		log.Fatalf("Error: %v\n", e)
-		os.Exit(1)
 	}
+
 	for _, player := range players {
 		current, er := wom.ReadLocalPlayer(player)
 		if er != nil {
-			log.Fatalf("Error: %v\n", er)
-			os.Exit(1)
+			log.Printf("Error: reading local player %s: %v", player, er)
+			continue
 		}
-		p, err := wom.GetPlayerFromAPI(player)
+
+		p, err := wom.FetchFromAPI(player)
 		if err != nil {
-			log.Fatalf("Error: %v\n", err)
-			os.Exit(1)
+			log.Printf("Error: fetching API data for %s: %v", player, err)
+			continue
 		}
 
 		if current.Username == "" {
-			log.Printf("initialised baseline: %s",player)
+			log.Printf("Initialised baseline for: %s", player)
+			if err := wom.SaveData(player, p); err != nil {
+				log.Printf("Error: failed to save initial baseline for %s: %v", player, err)
+			}
 			continue
 		}
+
+		log.Printf("DEBUG: Comparing player %s -> Local UpdatedAt: [%s] vs API UpdatedAt: [%s]",
+			player, current.UpdatedAt, p.UpdatedAt)
 
 		if p.UpdatedAt == current.UpdatedAt {
-			// curl update "no change", or no message
+			log.Printf("DEBUG: No changes detected for %s. Skipping.", player)
 			continue
 		}
+
+		log.Printf("DEBUG: Changes detected, building diff and sending webhook for %s", player)
+
 		diff := p.GetDiff(current)
-		content := fmt.Sprintf("{ \"content\": \"%s\"}", diff.Format())
-		payloadBytes := []byte(content)
-		resp, err := http.Post(DISCORD_WEBHOOK_URL, "application/json", bytes.NewBuffer(payloadBytes))
-		if err != nil {
-			log.Fatalf("failed to send webhook request: %v", err)
-			os.Exit(1)
+		if diff.IsEmpty() {
+			log.Printf("DEBUG: No meaningful diff for %s after UpdatedAt change. Saving baseline and skipping webhook.", player)
+			if err := wom.SaveData(player, p); err != nil {
+				log.Printf("Error: failed to update local baseline for %s: %v", player, err)
+			}
+			continue
 		}
-		defer resp.Body.Close()
+
+		payload := map[string]string{
+			"content": diff.Format(),
+		}
+
+		payloadBytes, err := json.Marshal(payload)
+		if err != nil {
+			log.Printf("failed to marshal JSON for %s: %v", player, err)
+			continue
+		}
+
+		resp, err := http.Post(discordWebhookURL, "application/json", bytes.NewBuffer(payloadBytes))
+		if err != nil {
+			log.Printf("failed to send webhook request for %s: %v", player, err)
+			continue
+		}
+		resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-			log.Fatalf("discord webhook returned non-success status: %d", resp.StatusCode)
-			os.Exit(1)
+			log.Printf("discord webhook returned non-success status for %s: %d", player, resp.StatusCode)
+			continue
 		}
-		time.Sleep(3 * time.Second) // see if this is necessary
-	}
-	return
-}
 
+		if err := wom.SaveData(player, p); err != nil {
+			log.Printf("Error: failed to update local baseline for %s: %v", player, err)
+		} else {
+			log.Printf("Successfully updated baseline for %s", player)
+		}
+
+		time.Sleep(3 * time.Second)
+	}
+}

@@ -128,7 +128,7 @@ func archiveCurrentFile(username string) error {
 
 
 // DRY ified
-func fetchFromAPI(username string) (Player, error) {
+func FetchFromAPI(username string) (Player, error) {
 	url := fmt.Sprintf("https://api.wiseoldman.net/v2/players/%s", username)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
@@ -158,38 +158,3 @@ func fetchFromAPI(username string) (Player, error) {
 	return p, nil
 }
 
-func GetPlayerFromAPI(username string) (Player, error) {
-    p, err := ReadLocalPlayer(username)
-    if err != nil {
-        // No local file, fetch straight from API
-        fetched, err := fetchFromAPI(username)
-        if err != nil {
-            return Player{}, err
-        }
-        err = SaveData(username, fetched)
-		if err != nil {
-		return Player{}, err
-		}
-        return fetched, nil
-    }
-
-    stale, err := IsDataStale(username)
-    if err != nil {
-        return Player{}, err
-    }
-
-    if !stale {
-        return p, nil
-    }
-
-    // It's stale, fetch fresh data and save it
-    fetched, err := fetchFromAPI(username)
-    if err != nil {
-        return Player{}, err
-    }
-    err = SaveData(username, fetched)
-	    if err != nil {
-		return Player{}, err
-	    }
-    return fetched, nil
-}
